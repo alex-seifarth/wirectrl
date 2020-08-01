@@ -15,7 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
-#include <signal.h>
+#include <csignal>
 #include <systemd/sd-event.h>
 
 #include <core/sd_event_loop.h>
@@ -29,34 +29,36 @@ namespace core {
     //! Blocks the
     struct sig_set_ctrl
     {
-        sig_set_ctrl(core::sd_event_loop& event_loop_)
+        explicit sig_set_ctrl(core::sd_event_loop& event_loop_)
             : _event_loop{event_loop_}
+            , _old_set{}
         {
+            int r;
             std::array<int, 2> signals{SIGTERM, SIGINT};
 
             sigemptyset(&_old_set);
             sigset_t new_set;
             sigemptyset(&new_set);
             for (auto const& signal : signals) {
-                bool r = sigaddset(&new_set, signal);
+                r = sigaddset(&new_set, signal);
                 if (r < 0)
                     throw core::runtime_exception{"cannot add signal", r};
             }
-            bool r = sigprocmask(SIG_BLOCK, &new_set, &_old_set);
+            r = sigprocmask(SIG_BLOCK, &new_set, &_old_set);
             if (r < 0)
                 throw core::runtime_exception{"cannot set signal set", r};
 
             for (auto const& signal : signals) {
                 _signal_event_sources.push_back(nullptr);
-                bool r = sd_event_add_signal(event_loop_.get(), &_signal_event_sources.back(), signal, NULL, NULL);
+                r = sd_event_add_signal(event_loop_.get(), &_signal_event_sources.back(), signal, nullptr, nullptr);
                 if (r < 0)
                     throw core::runtime_exception{"Cannot set signal handler", r};
             }
         }
 
-        void enable_watchdog()
+        void enable_watchdog() const
         {
-            bool r = sd_event_set_watchdog(_event_loop.get(), true);
+            int r = sd_event_set_watchdog(_event_loop.get(), true);
             if (r < 0)
                 throw core::runtime_exception{"unable to setup watchdog", r};
         }

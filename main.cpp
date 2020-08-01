@@ -4,7 +4,7 @@
 #include <string>
 
 int main() {
-    core::dbus_application app{};
+    core::dbus_application app{core::DBusType::Session, "de.titnc.test"};
     app.run();
 
 

@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <core/application.h>
-#include <core/final.h>
 #include "sig_set_ctrl.h"
 
 #include <systemd/sd-event.h>
@@ -48,9 +47,3 @@ core::sd_event_loop const& application::get_sd_event() const
 {
     return _sd_event_loop;
 }
-
-
-
-
-
-

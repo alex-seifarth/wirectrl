@@ -16,22 +16,35 @@
 #pragma once
 
 #include <core/application.h>
+#include <systemd/sd-bus.h>
+#include <string>
 
 namespace core {
+
+    enum class DBusType {
+        System,
+        Session,
+    };
 
     class dbus_application : public core::application
     {
     public:
-        dbus_application();
+        explicit dbus_application(DBusType dbus_type_, std::string connection_name = std::string{});
         ~dbus_application();
 
         dbus_application(dbus_application const&) = delete;
         dbus_application& operator=(dbus_application const&) = delete;
 
-    protected:
-        void pre_run() override;
-        void post_run() override;
+        void run() final; //! \todo final vs. override
 
+    protected:
+        void pre_run() override {};
+        void post_run() override {};
+
+    private:
+        DBusType _dbus_type;
+        sd_bus *_sd_bus{nullptr};
+        std::string _connection_name;
     };
 
 }

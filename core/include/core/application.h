@@ -34,7 +34,7 @@ namespace core {
         //! Enters the sd-event loop until a terminating signal is received or the app terminates the loop.
         //! This method first calls pre_run before it enters the sd_event loop and
         //! calls post_run after the loop returns.
-        void run();
+        virtual void run();
 
     protected:
         //! Called before the sd-event loop is run.

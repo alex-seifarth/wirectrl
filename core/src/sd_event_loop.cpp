@@ -62,3 +62,13 @@ core::sd_event_loop core::sd_event_loop::default_loop()
     }
     return sd_event_loop{def_event};
 }
+
+core::sd_event_loop core::sd_event_loop::create()
+{
+    sd_event* ev;
+    int r = sd_event_new(&ev);
+    if (r < 0) {
+        throw core::runtime_exception{"unable to allocate event loop", r};
+    }
+    return sd_event_loop{ev};
+}

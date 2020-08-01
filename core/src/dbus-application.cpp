@@ -14,21 +14,48 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <core/dbus-application.h>
+#include <core/exception.h>
+#include <core/final.h>
 
 using namespace core;
 
-dbus_application::dbus_application()
+dbus_application::dbus_application(DBusType dbus_type_, std::string connection_name_)
     : core::application{}
-{}
-
-dbus_application::~dbus_application() = default;
-
-void dbus_application::pre_run()
+    , _dbus_type{dbus_type_}
+    , _connection_name{std::move(connection_name_)}
 {
+    int r;
+    if (_dbus_type == DBusType::Session) {
+        r = sd_bus_open_user(&_sd_bus);
+    }
+    else {
+        r = sd_bus_open_system(&_sd_bus);
+    }
+    if (r < 0) {
+        throw core::runtime_exception{"cannot get system d-bus", r};
+    }
+    core::final unref_bus{[this](){sd_bus_unref(_sd_bus);}};
 
+    if (!connection_name_.empty()) {
+        r = sd_bus_request_name(_sd_bus, _connection_name.c_str(), 0);
+        if (r < 0) {
+            throw core::runtime_exception{"cannot get system d-bus", r};
+        }
+    }
+
+    unref_bus.reset();
 }
 
-void dbus_application::post_run()
+void dbus_application::run()
 {
+    int r = sd_bus_attach_event(_sd_bus, get_sd_event().get(), 0);
+    if (r < 0) {
+        throw core::runtime_exception{"unable to attach dbus to event loop", r};
+    }
+    application::run();
+}
 
+dbus_application::~dbus_application()
+{
+    sd_bus_unref(_sd_bus);
 }
