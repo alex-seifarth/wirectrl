@@ -36,7 +36,7 @@ dbus_application::dbus_application(DBusType dbus_type_, std::string connection_n
     }
     core::final unref_bus{[this](){sd_bus_unref(_sd_bus);}};
 
-    if (!connection_name_.empty()) {
+    if (!_connection_name.empty()) {
         r = sd_bus_request_name(_sd_bus, _connection_name.c_str(), 0);
         if (r < 0) {
             throw core::runtime_exception{"cannot get system d-bus", r};
