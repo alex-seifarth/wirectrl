@@ -13,31 +13,9 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#pragma once
 
-#include <string>
-#include <vector>
-#include <ostream>
-#include <istream>
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
-namespace iniread {
+#include <doctest/doctest.h>
 
-    struct property
-    {
-        std::string name{};
-        std::string value{};
-        int line_number;
-    };
 
-    struct section
-    {
-        std::string name{};
-        std::string value{};
-        std::vector<section> subsections{};
-        std::vector<property> properties{};
-        int line_number{0};
-    };
-
-    section read_ini_file(std::istream& input);
-    void write_init_file(std::ostream& output);
-}

@@ -16,8 +16,14 @@
 #pragma once
 
 #include "opts.h"
+#include "types.h"
+
 #include <iniread/iniread.h>
+#include <core/ini.h>
+
+#include <string>
 #include <tuple>
+#include <vector>
 
 //! Searches for the configuration file and parses it.
 //! The method searches for the configuration file in the following order:
@@ -32,4 +38,31 @@
 //!    throws a std::runtime_error.
 //! @throws     std::runtime_error  Thrown when expected files are not found or ini-syntax errors occurred.
 //! @return     Returns a pair consisting of the ini-file root section and the ini-file's path
-std::pair<iniread::section, std::string> get_config(opts const& options);
+std::pair<core::ini::file, std::string> get_config(opts const& options);
+
+
+struct dbus_configuration {
+    std::string connection_name;
+    std::string object_name;
+    bool use_session_bus;
+
+    static dbus_configuration decode_from_section(core::ini::section const& s);
+};
+
+struct gpio_configuration {
+    std::string name;
+    std::string consumer;
+    gpio::level initial_level;
+    gpio::active_level active_level;
+    gpio::pull_resistor pull_resistor;
+    bool terminate_on_error;
+
+    static gpio_configuration decode_from_section(core::ini::section const& s);
+};
+
+struct configuration {
+    dbus_configuration dbus{};
+    std::vector<gpio_configuration> gpios{};
+
+    static configuration decode_from_section(core::ini::file const& ini_file);
+};

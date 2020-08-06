@@ -27,7 +27,6 @@ order:
   configuration file path is specified via the environment variable and it
   is not found, the program terminates with EXIT_FAILURE.
 * ${WORKING_DIR}/wirectrl.conf 
-* ${BINARY_DIR}/wirectrl.conf
 * ${USER}/.wirectrl/wirectrl.conf
 * /etc/wirectrl/wirectrl.conf
 

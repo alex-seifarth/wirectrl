@@ -7,6 +7,7 @@ set(SRCS
     src/application.cpp
     src/dbus-application.cpp
     src/final.cpp
+    src/ini.cpp
 )
 
 add_library(core STATIC "${SRCS}")
@@ -25,3 +26,7 @@ target_compile_options(core
             -Wall -Werror -Wextra -Wconversion -Wsign-conversion>
         $<$<CXX_COMPILER_ID:MSVC>: /W4 /WX>
 )
+
+if(BUILD_TESTING)
+    add_subdirectory(testing)
+endif()
