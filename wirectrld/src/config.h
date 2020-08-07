@@ -18,7 +18,6 @@
 #include "opts.h"
 #include "types.h"
 
-#include <iniread/iniread.h>
 #include <core/ini.h>
 
 #include <string>
@@ -57,6 +56,8 @@ struct gpio_configuration {
     gpio::pull_resistor pull_resistor;
     bool terminate_on_error;
 
+    std::string gpio_chip_name;
+    unsigned gpio_line_id;
     static gpio_configuration decode_from_section(core::ini::section const& s);
 };
 

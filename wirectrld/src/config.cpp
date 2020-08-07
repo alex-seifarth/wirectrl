@@ -158,15 +158,26 @@ dbus_configuration dbus_configuration::decode_from_section(core::ini::section co
     return dc;
 }
 
-gpio_configuration gpio_configuration::decode_from_section(core::ini::section const& section)
-{
+gpio_configuration gpio_configuration::decode_from_section(core::ini::section const& section) {
     gpio_configuration gc;
     gc.name = get_prop_value(section, "name", std::string{});
     gc.consumer = get_prop_value(section, "consumer", "wirectrl");
 
     gc.active_level = get_prop_value_enum<gpio::active_level>(section, "active-level",
-           {{"low", gpio::active_level::active_low}, {"high", gpio::active_level::active_high}},
-           gpio::active_level::undefined);
+                                                              {{"low",  gpio::active_level::active_low},
+                                                               {"high", gpio::active_level::active_high}},
+                                                              gpio::active_level::undefined);
+    gc.initial_level = get_prop_value_enum<gpio::level>(section, "init-level",
+                                                        {{"inactive", gpio::level::inactive},
+                                                         {"active",   gpio::level::active}},
+                                                        gpio::level::inactive);
 
+    static std::regex const gpio_line_spec_regex{R"((.+)\-([0-9]+))"};
+    std::smatch line_spec_match;
+    if (!std::regex_match(section.value, line_spec_match, gpio_line_spec_regex) || line_spec_match.size() < 2) {
+        throw std::runtime_error{std::string{"Invalid gpio line spec: "} + section.value};
+    };
+    gc.gpio_chip_name = line_spec_match[1];
+    gc.gpio_line_id = static_cast<unsigned>(std::stoi(line_spec_match[2]));
     return gc;
 }

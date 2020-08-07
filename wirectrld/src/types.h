@@ -15,6 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
+#include <gpiod.h>
+
+#include <string>
+
 namespace gpio {
     enum class level {
         active,
@@ -31,6 +35,32 @@ namespace gpio {
         none,
         up,
         down,
+    };
+
+    class gpio_line
+    {
+    public:
+        gpio_line(std::string name, std::string chip, unsigned line,
+                  std::string const& consumer, gpio::level init_level, active_level al);
+        ~gpio_line();
+
+        gpio_line(gpio_line&&) noexcept;
+
+    private:
+        std::string _name;
+        gpiod_chip *_chip;
+        gpiod_line *_line;
+    };
+
+    class gpio_exception : public std::exception
+    {
+    public:
+        explicit gpio_exception(std::string msg, int error);
+
+        std::string const& message() const noexcept;
+    private:
+        std::string _message;
+        int _errorno;
     };
 
 } // namespace gpio
