@@ -46,10 +46,19 @@ namespace gpio {
 
         gpio_line(gpio_line&&) noexcept;
 
+        std::string const& name() const;
+
+        gpio::level level() const;
+
+        //! @throw  gpio_exception   Thrown when GPIOD returns an error
+        //! @return Returns true if level has changed, false if level stays the same.
+        bool set_level(gpio::level lev);
+
     private:
         std::string _name;
         gpiod_chip *_chip;
         gpiod_line *_line;
+        gpio::level _level;
     };
 
     class gpio_exception : public std::exception
@@ -58,6 +67,9 @@ namespace gpio {
         explicit gpio_exception(std::string msg, int error);
 
         std::string const& message() const noexcept;
+
+        int error() const;
+
     private:
         std::string _message;
         int _errorno;

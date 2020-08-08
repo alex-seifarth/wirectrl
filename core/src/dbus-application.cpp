@@ -59,3 +59,9 @@ dbus_application::~dbus_application()
 {
     sd_bus_unref(_sd_bus);
 }
+
+sd_bus* dbus_application::bus() const
+{
+    return _sd_bus;
+}
+

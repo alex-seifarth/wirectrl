@@ -26,6 +26,7 @@ gpio_line::gpio_line(std::string name, std::string chip, unsigned line,
                      std::string const& consumer, gpio::level init_level,
                      active_level al)
     : _name{std::move(name)}
+    , _level{init_level}
 {
     _chip = gpiod_chip_open_lookup(chip.c_str());
     if (!_chip) {
@@ -51,6 +52,7 @@ gpio_line::gpio_line(gpio_line&& old) noexcept
     : _name{std::move(old._name)}
     , _chip{old._chip}
     , _line{old._line}
+    , _level{old._level}
 {
     old._name.clear();
     old._chip = nullptr;
@@ -62,6 +64,28 @@ gpio_line::~gpio_line()
     if (_line) {
         gpiod_line_close_chip(_line);
     }
+}
+
+std::string const& gpio_line::name() const
+{
+    return _name;
+}
+
+gpio::level gpio_line::level() const
+{
+    return _level;
+}
+
+bool gpio_line::set_level(gpio::level lev)
+{
+    if (lev == _level) {
+        return false;
+    }
+    if (0 != gpiod_line_set_value(_line, lev == gpio::level::active ? 1 : 0)) {
+        throw gpio_exception{"cannot set value", errno};
+    }
+    _level = lev;
+    return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -77,3 +101,7 @@ std::string const& gpio_exception::message() const noexcept
     return _message;
 }
 
+int gpio_exception::error() const
+{
+    return _errorno;
+}

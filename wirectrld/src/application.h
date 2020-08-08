@@ -22,6 +22,14 @@
 
 #include <vector>
 
+enum class gpio_set_result
+{
+    success,
+    no_change,
+    name_not_found,
+    gpiod_error,
+};
+
 class application : public core::dbus_application
 {
 public:
@@ -39,7 +47,17 @@ private:
     void setup_gpio();
     void setup_dbus_interface();
 
+    static int gdc_get_property_lines(sd_bus*, const char*, const char*, const char*,
+                                      sd_bus_message *reply, void *userdata, sd_bus_error *ret_error);
+    int dbus_property_get_lines(sd_bus_message *reply, sd_bus_error *ret_error);
+
+    static int gdc_set_line_handler(sd_bus_message *m, void *userdata, sd_bus_error *ret_error);
+    int dbus_set_line_handler(sd_bus_message* msg, sd_bus_error* ret_error);
+    gpio_set_result set_line(std::string const& name, gpio::level lev);
+
 private:
     configuration _config;
     std::vector<gpio::gpio_line> _gpios{};
+
+    sd_bus_slot* _vtable_slot{nullptr};
 };

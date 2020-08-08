@@ -41,6 +41,8 @@ namespace core {
         void pre_run() override {};
         void post_run() override {};
 
+        sd_bus* bus() const;
+
     private:
         DBusType _dbus_type;
         sd_bus *_sd_bus{nullptr};
