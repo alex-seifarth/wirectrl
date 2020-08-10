@@ -161,7 +161,6 @@ int application::dbus_set_line_handler(sd_bus_message* msg, sd_bus_error* ret_er
     }
 
     auto result = set_line(line_name, line_level == 0 ? gpio::level::inactive : gpio::level::active);
-    int result_code{};
     switch (result) {
         case gpio_set_result::success:
             sd_bus_emit_properties_changed(dbus_application::bus(),
@@ -169,19 +168,18 @@ int application::dbus_set_line_handler(sd_bus_message* msg, sd_bus_error* ret_er
                                            WIRECTRL_INTERFACE,
                                            "lines",
                                            nullptr);
-            result_code = 0;
-            break;
+            return sd_bus_reply_method_return(msg, "i", 0);
         case gpio_set_result::no_change:
-            result_code = 1;
+            return sd_bus_reply_method_return(msg, "i", 1);
             break;
         case gpio_set_result::name_not_found:
-            result_code = 1000;
-            break;
+            sd_bus_error_set_const(ret_error, "LineNameNotFound", "Line name is not configured or failed at setup");
+            return -EINVAL;
         case gpio_set_result::gpiod_error:
-            result_code = 1001;
-            break;
+            sd_bus_error_set_const(ret_error, "GpiodError", "LibGpiod reported error");
+            return -EINVAL;
     }
-    return sd_bus_reply_method_return(msg, "i", result_code);
+    return -EINVAL;
 }
 
 gpio_set_result application::set_line(std::string const& name, gpio::level lev)

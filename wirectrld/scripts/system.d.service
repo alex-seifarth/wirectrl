@@ -1,0 +1,10 @@
+[Unit]
+Description=Wire Control - a gpio output control service accessible via DBus
+
+[Service]
+Type=dbus
+BusName=de.titnc.pi.wirectrl
+ExecStart=/usr/sbin/wirectrld -c /etc/wirectrl/wirectrld.conf
+
+[Install]
+WantedBy=multi-user.target
