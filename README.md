@@ -97,8 +97,8 @@ consumer = "myGpioLineNameOrSomethingElse"
 init-level = inactive
 active-level = high
 ```
-The [gpio] section requires a value in the form *<gpio-chip>-<line-number>* where
-*<gpio-chip>* is the identity of a gpio chip or its index. This follows the nomenclatura 
+The [gpio] section requires a value in the form *gpiochip-linenumber* where
+*gpiochip* is the identity of a gpio chip or its index. This follows the nomenclatura 
 of *libgpiod*. You can check which gpio chips exist either by
 ```bash 
 ls /dev | grep "gpio"
@@ -109,7 +109,7 @@ gpiodetect
 ```
 If the latter command is not available, the *gpiod* package is not installed on your 
 system.
-The *<line-number>* is an unsigned integer identifying the GPIO in/out line of the
+The *linenumber* is an unsigned integer identifying the GPIO in/out line of the
 chip.
 
 There are four fields in a gpio section:
