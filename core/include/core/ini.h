@@ -54,7 +54,7 @@ namespace core::ini {
     struct property {
         std::string name{};     //!< name of the property
         std::string value{};    //!< value for the property (maybe empty)
-        int line_number{0};     //!< line number for diagnostics
+        int line_number{};     //!< line number for diagnostics
     };
 
     //! Section of an ini-file
@@ -79,13 +79,18 @@ namespace core::ini {
 
     private:
         std::vector<section> _sections{};
+
+        template<typename T> friend file merge_files(T const&);
     };
+
+//    template<typename T>
+//    file merge_files(T const& list_of_files);
 
     class parse_exception : public std::exception
     {
     public:
-        parse_exception(int line_number, std::string expr = std::string{});
-        ~parse_exception();
+        explicit parse_exception(int line_number, std::string expr = std::string{});
+        ~parse_exception() override;
 
         const char* what() const noexcept override;
 
@@ -98,4 +103,31 @@ namespace core::ini {
         int _line_number;
     };
 
+}
+
+template<typename T>
+core::ini::file core::ini::merge_files(T const& list_of_files)
+{
+    file merged{};
+    section root_section{};
+    for (auto const& f : list_of_files) {
+        if (!f._sections.empty() && f._sections[0].name.empty()) {
+            root_section.properties.insert(
+                    root_section.properties.end(),
+                    f._sections[0].properties.begin(),
+                    f._sections[0].properties.end()
+            );
+        }
+    }
+    if (!root_section.properties.empty()) {
+        merged._sections.push_back(root_section);
+    }
+    for (auto const& f : list_of_files) {
+        for (auto const& s : f._sections) {
+            if (!s.name.empty()) {
+                merged._sections.push_back(s);
+            }
+        }
+    }
+    return merged;
 }

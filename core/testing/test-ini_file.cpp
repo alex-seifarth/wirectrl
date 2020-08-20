@@ -66,3 +66,46 @@ pull-resistor =
     CHECK_EQ(gpio_section.properties[5].name, "pull-resistor");
     CHECK_EQ(gpio_section.properties[5].value, std::string{});
 }
+
+TEST_CASE("ini-file merge")
+{
+    const char* txt1 =
+            R"ini(
+connection-id = "de.titnc.pi.wirectrl"
+object-id = /de/titnc/pi/wirectrl/v1
+use-session-bus = false
+
+[gpio = 0-17]
+name = "AV-Receiver"
+consumer = "asdd" #default is wirectrl
+idle-value = off
+on-error = ignore|terminate
+active-level = high|low
+pull-resistor =
+)ini";
+
+    std::istringstream istr1{txt1};
+    core::ini::file f1{istr1};
+
+    const char* txt2 =
+            R"ini(
+connection-id = "1"
+use-session-bus = false
+
+[gpio = 0-18]
+name = "AVdr"
+consumer = "asdd" #default is wirectrl
+)ini";
+
+    std::istringstream istr2{txt2};
+    core::ini::file f2{istr2};
+
+    auto merged = core::ini::merge_files(std::vector<core::ini::file>{f1, f2});
+    CHECK_EQ(merged.sections().size(), 3);
+    CHECK(merged.sections()[0].name.empty()); // has root section
+    CHECK_EQ(merged.sections()[0].properties.size(), 5);
+    CHECK_EQ(merged.sections()[1].name, "gpio");
+    CHECK_EQ(merged.sections()[1].properties.size(), 6);
+    CHECK_EQ(merged.sections()[2].name, "gpio");
+    CHECK_EQ(merged.sections()[2].properties.size(), 2);
+}
